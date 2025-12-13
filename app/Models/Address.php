@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Address extends Model
+{
+    //
+    protected $fillable = [
+        'kota',
+        'kecamatan',
+        'link_map',
+    ];
+        // relasi dengan model MakeUpArtist
+    public function makeUpArtist()
+    {
+        return $this->belongsTo(MakeUpArtist::class);
+    }
+
+    // relasi dengan mode Verification
+    public function verification()
+    {
+        return $this->belongsTo(Verification::class);
+    }
+}
