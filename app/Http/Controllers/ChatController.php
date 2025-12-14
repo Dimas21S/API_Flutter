@@ -195,6 +195,14 @@ class ChatController extends Controller
     public function muaToUserApi($user_id)
     {
         $mua = Auth::guard('makeup_artist')->user();
+
+        if (!$mua) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
         $user = User::find($user_id);
 
         if (!$user) {
@@ -204,7 +212,15 @@ class ChatController extends Controller
             ], 404);
         }
 
-        // Ambil semua pesan antara MUA dan User
+        // Tandai pesan user sebagai sudah dibaca
+        Message::where('sender_id', $user->id)
+            ->where('sender_type', 'user')
+            ->where('receiver_id', $mua->id)
+            ->where('receiver_type', 'make_up_artist')
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        // Ambil seluruh chat
         $messages = Message::where(function ($query) use ($user, $mua) {
             $query->where('sender_id', $user->id)
                 ->where('sender_type', 'user')
@@ -218,25 +234,43 @@ class ChatController extends Controller
                 ->where('receiver_type', 'user');
         })
         ->orderBy('created_at', 'asc')
-        ->get();
-
-        // Tandai pesan User yang belum dibaca sebagai dibaca
-        Message::where('sender_id', $user->id)
-            ->where('sender_type', 'user')
-            ->where('receiver_id', $mua->id)
-            ->where('receiver_type', 'make_up_artist')
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
+        ->get()
+        ->map(function ($msg) use ($user, $mua) {
+            return [
+                'id' => $msg->id,
+                'sender_id' => $msg->sender_id,
+                'sender_type' => $msg->sender_type,
+                'sender_name' => $msg->sender_type === 'user'
+                    ? $user->name
+                    : $mua->username,
+                'message' => $msg->message,
+                'is_read' => $msg->is_read,
+                'created_at' => $msg->created_at,
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'user' => $user,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+            ],
             'messages' => $messages
         ], 200);
     }
 
+
     public function muaSendToUserApi(Request $request, $user_id)
     {
+        $mua = Auth::guard('makeup_artist')->user();
+
+        if (!$mua) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
         $request->validate([
             'message' => 'required|string|max:1000',
         ]);
@@ -251,7 +285,7 @@ class ChatController extends Controller
         }
 
         $message = Message::create([
-            'sender_id' => Auth::guard('makeup_artist')->id(),
+            'sender_id' => $mua->id,
             'sender_type' => 'make_up_artist',
             'receiver_id' => $user->id,
             'receiver_type' => 'user',
@@ -261,9 +295,17 @@ class ChatController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Pesan terkirim!',
-            'data' => $message
+            'data' => [
+                'id' => $message->id,
+                'sender_id' => $mua->id,
+                'sender_type' => 'make_up_artist',
+                'sender_name' => $mua->username,
+                'message' => $message->message,
+                'is_read' => false,
+                'created_at' => $message->created_at,
+            ]
         ], 201);
     }
+
 
 }

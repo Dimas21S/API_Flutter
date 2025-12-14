@@ -344,11 +344,24 @@ class ArtistController extends Controller
             'status' => true,
             'message' => 'Data pesan berhasil diambil',
             'data' => [
-                'latest_messages' => $messages,
+                'latest_messages' => $messages->map(function ($msg) {
+                    return [
+                        'id' => $msg->id,
+                        'sender_id' => (int) $msg->sender_id,
+                        'sender_type' => $msg->sender_type,
+                        'sender_name' => $msg->sender_type === 'user'
+                            ? optional($msg->sender)->name
+                            : optional($msg->sender)->username,
+                        'message' => $msg->message,
+                        'is_read' => $msg->is_read,
+                        'created_at' => $msg->created_at,
+                    ];
+                }),
                 'total_messages'  => $totalMessages,
                 'message_counts'  => $messageCounts
             ]
         ], 200);
+
     }
 
     public function formSubmitRequest(Request $request)

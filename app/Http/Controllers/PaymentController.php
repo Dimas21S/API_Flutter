@@ -27,7 +27,7 @@ class PaymentController extends Controller
                 'mua_id'       => 'required',
                 'price'        => 'required|numeric',
                 'biaya_admin'  => 'nullable|numeric',
-                'total'        => 'required|numeric',
+                'total'        => 'nullable|numeric',
             ]);
 
             $packageId   = $request->package_id;

@@ -37,14 +37,14 @@ class UserController extends Controller
         $artists = MakeUpArtist::where('status', 'accepted')->get();
 
         // History user
-        $history = $user->histories()
-            ->with('makeupartist')
-            ->whereHas('makeupartist', function ($query) {
-                $query->where('status', 'accepted');
-            })
-            ->latest()
-            ->take(5)
-            ->get();
+        // $history = $user->histories()
+        //     ->with('makeupartist')
+        //     ->whereHas('makeupartist', function ($query) {
+        //         $query->where('status', 'accepted');
+        //     })
+        //     ->latest()
+        //     ->take(5)
+        //     ->get();
 
         // Liked
         $likedArtists = Like::where('user_id', $user->id)
@@ -58,7 +58,7 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Data favourite user berhasil diambil',
             'artists' => $artists,
-            'history' => $history,
+            // 'history' => $history,
             'liked_artists' => $likedArtists
         ], 200);
     }
@@ -114,6 +114,32 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Profil berhasil diperbarui!',
             'user' => $user
+        ], 200);
+    }
+
+    public function showFormPembayaran($id)
+    {
+        $mua = MakeUpArtist::with('packages')->find($id);
+
+        if (!$mua) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artist tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $mua->id,
+                'name' => $mua->name,
+                'category' => $mua->category,
+                'biaya_admin' => 2000,
+                'packages' => [
+                    'id' => $mua->packages->id,
+                    'price' => $mua->packages->price,
+                ]
+            ]
         ], 200);
     }
 

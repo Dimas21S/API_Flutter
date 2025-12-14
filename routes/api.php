@@ -29,7 +29,8 @@ Route::get('/artist-location', [ArtistController::class, 'listAddressMakeUpArtis
 Route::post('/profile/edit-profile', [UserController::class, 'userUpdateProfile']);
 Route::middleware('jwt')->get('/chat-mua/{mua_id}', [ChatController::class, 'getUserToMuaApi']);
 Route::post('/chat-mua/{mua_id}', [ChatController::class, 'userSendToMuaAPi']);
-Route::get('/booking/{id}', [PaymentController::class, 'getSnapToken']);
+Route::post('/booking/snap-token', [PaymentController::class, 'getSnapToken']);
+Route::get('/booking/{id}', [UserController::class, 'showFormPembayaran']);
 
 
 // MUA
@@ -37,8 +38,8 @@ Route::post('/submit-request', [ArtistController::class, 'formSubmitRequest'])->
 Route::middleware('auth:makeup_artist')->get('/beranda-mua', [ArtistController::class, 'artistIndex']);
 Route::get('/chat', [ArtistController::class, 'receivedMessagesApi']);
 Route::post('/profile-mua/edit-profile', [ArtistController::class, 'updateMakeUpArtist']);
-Route::get('/chat-user', [ChatController::class, ['muaToUserApi']]);
-Route::post('/chat-user', [ChatController::class, ['muaSendToUserApi']]);
+Route::get('/chat-user/{user_id}', [ChatController::class, 'muaToUserApi']);
+Route::post('/chat-user/{user_id}', [ChatController::class, 'muaSendToUserApi']);
 Route::post('/update-mua', [ArtistController::class, 'updateMakeUpArtist']);
 
 // Admin
