@@ -7,6 +7,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\LikedController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PaymentController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/test', function () {
